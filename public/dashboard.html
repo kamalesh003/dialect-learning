@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DialectLearn</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>DialectLearn</h1>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/">Home</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <section class="search-section">
+            <h2>Translate Words</h2>
+            <div class="search-form">
+                <select id="languageSelect">
+                    <option value="tamil">Tamil</option>
+                    <option value="telugu">Telugu</option>
+                    <option value="hindi">Hindi</option>
+                    <option value="tulu">Tulu</option>
+                    
+                </select>
+                <input type="text" id="wordInput" placeholder="Enter word to translate">
+                <button onclick="searchWord()" class="btn-primary">Search</button>
+            </div>
+            <div id="searchResult" class="result"></div>
+            <div id="searchLimit" class="limit-info"></div>
+        </section>
+
+        <section class="pricing-section">
+            <h2>Upgrade to Premium</h2>
+            <div class="pricing">
+                <div class="price-card">
+                    <h3>Monthly Plan</h3>
+                    <p class="price">₹199/month</p>
+                    <button class="btn-primary">Upgrade</button>
+                </div>
+                <div class="price-card featured">
+                    <h3>Yearly Plan</h3>
+                    <p class="price">₹1499/year</p>
+                    <button class="btn-primary">Upgrade</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function searchWord() {
+            const word = document.getElementById('wordInput').value;
+            const language = document.getElementById('languageSelect').value;
+            const token = localStorage.getItem('token');
+            
+            if (!word) {
+                alert('Please enter a word');
+                return;
+            }
+            
+            fetch('/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ word, language, token })
+            })
+            .then(response => response.json())
+            .then(result => {
+                const resultDiv = document.getElementById('searchResult');
+                const limitDiv = document.getElementById('searchLimit');
+                
+                if (result.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>${result.data.word}</strong> in ${result.data.language}: 
+                            <strong>${result.data.meaning}</strong>
+                        </div>
+                    `;
+                    
+                    if (result.data.searchesLeft !== null) {
+                        limitDiv.innerHTML = `Searches left this week: ${result.data.searchesLeft}`;
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">${result.message}</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('searchResult').innerHTML = 
+                    '<div class="error">Search failed</div>';
+            });
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
+        
+        // Check authentication
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

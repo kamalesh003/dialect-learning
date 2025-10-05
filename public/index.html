@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DialectLearn - Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>DialectLearn</h1>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/login">Login</a>
+                <a href="#" onclick="showRegister()">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h2>Learn Dialects Easily</h2>
+            <p>Translate words between Tamil, Telugu, Hindi and Tulu.</p>
+            
+            <div class="pricing">
+                <div class="price-card">
+                    <h3>Free Plan</h3>
+                    <p>10 searches per week</p>
+                    <p>Basic dictionary access</p>
+                    <button class="btn-secondary" onclick="showRegister()">Get Started</button>
+                </div>
+                <div class="price-card featured">
+                    <h3>Premium Monthly</h3>
+                    <p class="price">₹199/month</p>
+                    <p>Unlimited searches</p>
+                    <p>Full dictionary access</p>
+                    <button class="btn-primary" onclick="showRegister()">Subscribe</button>
+                </div>
+                <div class="price-card">
+                    <h3>Premium Yearly</h3>
+                    <p class="price">₹1499/year</p>
+                    <p>Unlimited searches</p>
+                    <p>Full dictionary access</p>
+                    <button class="btn-primary" onclick="showRegister()">Subscribe</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Registration Modal -->
+        <div id="registerModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeRegister()">&times;</span>
+                <h2>Create Account</h2>
+                <form id="registerForm">
+                    <input type="text" name="name" placeholder="Full Name" required>
+                    <input type="number" name="age" placeholder="Age" required min="1">
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required minlength="6">
+                    <button type="submit" class="btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showRegister() {
+            document.getElementById('registerModal').style.display = 'block';
+        }
+
+        function closeRegister() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    localStorage.setItem('token', result.token);
+                    alert('Registration successful!');
+                    window.location.href = '/dashboard';
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Registration failed');
+            }
+        });
+    </script>
+</body>
+</html>
